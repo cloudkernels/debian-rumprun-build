@@ -16,7 +16,7 @@ RUN apt-get update && \
     && apt-get clean
 
 RUN DESTDIR=/usr/local && \
-    git clone https://github.com/cloudkernels/rumprun -b solo5-aarch64-tests && \
+    git clone https://github.com/cloudkernels/rumprun -b solo5-tests-aarch64 && \
     cd rumprun && \
     git submodule init && git submodule update && \
     DESTDIR=$DESTDIR make && \
