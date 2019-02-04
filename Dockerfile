@@ -15,10 +15,9 @@ RUN apt-get update && \
         zlib1g-dev \
     && apt-get clean
 
-RUN DESTDIR=/usr/local && \
-    git clone https://github.com/cloudkernels/rumprun -b solo5-tests-aarch64 && \
-    cd rumprun && \
-    git submodule init && git submodule update && \
-    DESTDIR=$DESTDIR make && \
-    cd ../ && rm -rf rumprun
+RUN git clone https://github.com/cloudkernels/rumprun -b solo5-tests-aarch64
+RUN cd rumprun && git submodule update --init solo5
+RUN cd rumprun && git submodule update --init buildrump.sh
+RUN cd rumprun && git submodule update --init src-netbsd
+RUN cd rumprun && DESTDIR=/usr/local make && cd .. && rm -rf rumprun
 
