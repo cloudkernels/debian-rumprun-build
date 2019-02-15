@@ -15,7 +15,7 @@ RUN apt-get update && \
         zlib1g-dev \
     && apt-get clean
 
-RUN git clone https://github.com/cloudkernels/rumprun -b solo5-tests-aarch64
+RUN git clone https://github.com/cloudkernels/rumprun -b solo5-aarch64
 RUN cd rumprun && git submodule update --init solo5
 RUN cd rumprun && git submodule update --init buildrump.sh
 RUN cd rumprun && git submodule update --init src-netbsd
