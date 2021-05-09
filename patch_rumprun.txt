@@ -1,0 +1,22 @@
+diff --git a/lib/Makefile.inc b/lib/Makefile.inc
+index 35dade4..a75da13 100644
+--- a/lib/Makefile.inc
++++ b/lib/Makefile.inc
+@@ -1,4 +1,4 @@
+-CFLAGS+=	-Wall -Wextra -Wno-unused-parameter
++CFLAGS+=	-Wall -Wno-unused-parameter
+ CFLAGS+=	-Wmissing-prototypes -Wstrict-prototypes
+ CFLAGS+=	-fno-stack-protector
+ 
+diff --git a/lib/librumprun_base/Makefile b/lib/librumprun_base/Makefile
+index 1426205..99acff7 100644
+--- a/lib/librumprun_base/Makefile
++++ b/lib/librumprun_base/Makefile
+@@ -18,6 +18,6 @@ INCSDIR=	/usr/include/rumprun
+ WARNS=		5
+ 
+ CPPFLAGS+=	-I${.CURDIR}/../../include
+-CPPFLAGS+=	-D_KERNTYPES
++CPPFLAGS+=	-D_KERNTYPES -Wno-attributes
+ 
+ .include <bsd.lib.mk>

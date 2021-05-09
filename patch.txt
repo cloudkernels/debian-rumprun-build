@@ -1,0 +1,100 @@
+diff --git a/lib/libc/time/Makefile b/lib/libc/time/Makefile
+index d56a198fb..e121313b1 100644
+--- a/lib/libc/time/Makefile
++++ b/lib/libc/time/Makefile
+@@ -239,7 +239,7 @@ GCC_INSTRUMENT = \
+   -fsanitize-undefined-trap-on-error -fstack-protector
+ GCC_DEBUG_FLAGS = -DGCC_LINT -g3 -O3 -fno-common \
+   $(GCC_INSTRUMENT) \
+-  -Wall -Wextra \
++  -Wall \
+   -Walloc-size-larger-than=100000 -Warray-bounds=2 \
+   -Wbad-function-cast -Wcast-align=strict -Wdate-time \
+   -Wdeclaration-after-statement -Wdouble-promotion \
+diff --git a/share/mk/bsd.sys.mk b/share/mk/bsd.sys.mk
+index f0a0df566..59618d0e7 100644
+--- a/share/mk/bsd.sys.mk
++++ b/share/mk/bsd.sys.mk
+@@ -47,6 +47,7 @@ REPROFLAGS+=	-fdebug-regex-map='/usr/src/(.*)/obj/(.*)=/usr/obj/\1/\2'
+ REPROFLAGS+=	-fdebug-regex-map='/usr/src/(.*)/obj\..*=/usr/obj/\1'
+ REPROFLAGS+=	-fdebug-regex-map='/usr/src/(.*)/obj\..*/(.*)=/usr/obj/\1/\2'
+ 
++REPROFLAGS+=	-Wno-tautological-compare
+ CFLAGS+=	${REPROFLAGS}
+ CXXFLAGS+=	${REPROFLAGS}
+ .endif
+@@ -100,8 +101,8 @@ CFLAGS+=	-Wreturn-type -Wswitch -Wshadow
+ .endif
+ .if ${WARNS} > 2
+ CFLAGS+=	-Wcast-qual -Wwrite-strings
+-CFLAGS+=	-Wextra -Wno-unused-parameter
+-# Readd -Wno-sign-compare to override -Wextra with clang
++CFLAGS+=	-Wno-unused-parameter
++# Readd -Wno-sign-compare to override with clang
+ CFLAGS+=	-Wno-sign-compare
+ CXXFLAGS+=	-Wabi
+ CXXFLAGS+=	-Wold-style-cast
+diff --git a/sys/conf/Makefile.kern.inc b/sys/conf/Makefile.kern.inc
+index 71362fd67..9965af9c2 100644
+--- a/sys/conf/Makefile.kern.inc
++++ b/sys/conf/Makefile.kern.inc
+@@ -79,7 +79,7 @@ CWARNFLAGS+=	-Wno-unreachable-code
+ CWARNFLAGS+=	-Wno-pointer-sign -Wno-attributes
+ .  if ${MACHINE} == "i386" || ${MACHINE_ARCH} == "x86_64" || \
+ 	${MACHINE_ARCH} == "sparc64" || ${MACHINE} == "prep"
+-CWARNFLAGS+=	-Wextra -Wno-unused-parameter
++CWARNFLAGS+=	-Wno-unused-parameter
+ .  endif
+ .  if ${MACHINE} == "i386" || ${MACHINE_ARCH} == "x86_64"
+ CWARNFLAGS+=	-Wold-style-definition
+diff --git a/sys/kern/uipc_sem.c b/sys/kern/uipc_sem.c
+index 094979517..413e36678 100644
+--- a/sys/kern/uipc_sem.c
++++ b/sys/kern/uipc_sem.c
+@@ -87,8 +87,8 @@ MODULE(MODULE_CLASS_MISC, ksem, NULL);
+ 
+ #define	SEM_MAX_NAMELEN		NAME_MAX
+ 
+-# https://muc.lists.netbsd.bugs.narkive.com/2z13sHNT/kern-53998-sem-init-fails-with-error-1
+-# allow increase of SEM_NSEMS_MAX (incorrect error reported, see above)
++//# https://muc.lists.netbsd.bugs.narkive.com/2z13sHNT/kern-53998-sem-init-fails-with-error-1
++//# allow increase of SEM_NSEMS_MAX (incorrect error reported, see above)
+ #ifndef SEM_NSEMS_MAX
+ #define	SEM_NSEMS_MAX		256
+ #endif
+diff --git a/sys/rump/Makefile.rump b/sys/rump/Makefile.rump
+index 94329f256..272a0d550 100644
+--- a/sys/rump/Makefile.rump
++++ b/sys/rump/Makefile.rump
+@@ -48,7 +48,7 @@ CPPFLAGS+=	${RUMP_NBCOMPAT:C/[1-9]0/-DCOMPAT_&/g}
+ CPPFLAGS+=	-nostdinc
+ CFLAGS+=	-ffreestanding -fno-strict-aliasing
+ 
+-CWARNFLAGS+=	-Wno-format-zero-length -Wno-pointer-sign
++CWARNFLAGS+=	-Wno-format-zero-length -Wno-pointer-sign -Wno-tautological-compare
+ 
+ CPPFLAGS+=	-imacros ${RUMPTOP}/include/opt/opt_rumpkernel.h
+ .ifdef BUILDRUMP_IMACROS
+@@ -142,7 +142,7 @@ DPSRCS+=	${RUMPTOP}/Makefile.rump
+ #
+ 
+ # no easy way to get WARNS out of bsd.sys.mk
+-RUMPCOMP_USER_WARNFLAGS=	-Wall -Wextra -Wno-unused-parameter
++RUMPCOMP_USER_WARNFLAGS=	-Wall -Wno-unused-parameter
+ RUMPCOMP_USER_WARNFLAGS+=	-Wstrict-prototypes -Wmissing-prototypes
+ 
+ .ifdef RUMPCOMP_USER_SRCS && !defined(RUMPKERN_ONLY)
+diff --git a/sys/rump/kern/lib/libsys_linux/Makefile b/sys/rump/kern/lib/libsys_linux/Makefile
+index da2235b7e..80a91f0a1 100644
+--- a/sys/rump/kern/lib/libsys_linux/Makefile
++++ b/sys/rump/kern/lib/libsys_linux/Makefile
+@@ -16,7 +16,8 @@ SRCS+=        linux_rump.c
+ SRCS+= sys_linux_component.c
+ 
+ # XXX
+-CPPFLAGS+= -DINET6
++CPPFLAGS+= -DINET6 -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-implicit-fallthrough
++CFLAGS+= -DINET6 -Wno-unused-parameter -Wno-maybe-uninitialized -Wno-implicit-fallthrough
+ 
+ SYS_P=rump_linux_sys
+ .include "../Makefile.sys"
